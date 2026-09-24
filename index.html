@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Start Page</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --glass: rgba(20, 20, 25, .42);
+        --border: rgba(255,255,255,.15);
+        --text: #fff;
+        --muted: rgba(255,255,255,.65);
+    }
+
+    html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--text);
+    }
+
+    body {
+        background: #111;
+    }
+
+    /* Background */
+    #background {
+        position: fixed;
+        inset: 0;
+        z-index: -3;
+        background:
+            radial-gradient(circle at center, #333, #111);
+        background-size: cover;
+        background-position: center;
+        transition: filter .5s ease, transform .8s ease;
+    }
+
+    #background::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,.2);
+        backdrop-filter: blur(1px);
+    }
+
+    /* Main */
+    main {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+    }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        animation: appear .8s cubic-bezier(.2,.8,.2,1);
+    }
+
+    /* Logo */
+    .logo {
+        width: 110px;
+        height: 110px;
+        border-radius: 28px;
+        object-fit: cover;
+        display: block;
+
+        background: rgba(255,255,255,.12);
+        border: 1px solid var(--border);
+        box-shadow:
+            0 20px 50px rgba(0,0,0,.35),
+            0 0 0 8px rgba(255,255,255,.025);
+
+        transition:
+            transform .35s cubic-bezier(.2,.8,.2,1),
+            box-shadow .35s ease;
+    }
+
+    .logo:hover {
+        transform: translateY(-5px) scale(1.04);
+        box-shadow:
+            0 28px 60px rgba(0,0,0,.4),
+            0 0 0 10px rgba(255,255,255,.035);
+    }
+
+    .default-logo {
+        display: grid;
+        place-items: center;
+        font-size: 42px;
+        font-weight: 700;
+        color: white;
+    }
+
+    /* Bookmark */
+    .bookmark {
+        margin-top: 26px;
+        width: 48px;
+        height: 48px;
+        border-radius: 15px;
+
+        display: grid;
+        place-items: center;
+
+        color: white;
+        background: var(--glass);
+        border: 1px solid var(--border);
+
+        cursor: pointer;
+
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+
+        box-shadow: 0 12px 35px rgba(0,0,0,.25);
+
+        transition:
+            transform .25s ease,
+            background .25s ease;
+    }
+
+    .bookmark:hover {
+        transform: translateY(-3px);
+        background: rgba(255,255,255,.18);
+    }
+
+    .bookmark:active {
+        transform: scale(.92);
+    }
+
+    .bookmark svg {
+        width: 21px;
+        height: 21px;
+    }
+
+    /* Websites */
+    .sites {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 22px;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 600px;
+    }
+
+    .site {
+        width: 54px;
+        height: 54px;
+        border-radius: 17px;
+
+        display: grid;
+        place-items: center;
+
+        background: var(--glass);
+        border: 1px solid var(--border);
+
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+
+        cursor: pointer;
+
+        box-shadow: 0 10px 30px rgba(0,0,0,.2);
+
+        animation: siteIn .5s both;
+        transition:
+            transform .25s cubic-bezier(.2,.8,.2,1),
+            background .25s ease,
+            box-shadow .25s ease;
+    }
+
+    .site:hover {
+        transform: translateY(-5px) scale(1.05);
+        background: rgba(255,255,255,.18);
+        box-shadow: 0 16px 35px rgba(0,0,0,.3);
+    }
+
+    .site:active {
+        transform: scale(.9);
+    }
+
+    .site img {
+        width: 28px;
+        height: 28px;
+        object-fit: contain;
+        border-radius: 7px;
+    }
+
+    /* Add button */
+    .add {
+        font-size: 28px;
+        font-weight: 300;
+        color: rgba(255,255,255,.8);
+    }
+
+    /* Modal */
+    .modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+
+        background: rgba(0,0,0,.35);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+
+        z-index: 10;
+    }
+
+    .modal.active {
+        display: flex;
+        animation: fade .2s ease;
+    }
+
+    .panel {
+        width: min(390px, 100%);
+        padding: 24px;
+        border-radius: 24px;
+
+        background: rgba(25,25,30,.82);
+        border: 1px solid rgba(255,255,255,.13);
+
+        box-shadow: 0 30px 80px rgba(0,0,0,.5);
+
+        animation: panelIn .3s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .panel h2 {
+        margin: 0 0 18px;
+        font-size: 20px;
+    }
+
+    .panel input {
+        width: 100%;
+        padding: 13px 15px;
+        margin-bottom: 12px;
+
+        border: 1px solid rgba(255,255,255,.12);
+        border-radius: 13px;
+
+        outline: none;
+
+        background: rgba(255,255,255,.08);
+        color: white;
+
+        font: inherit;
+    }
+
+    .panel input::placeholder {
+        color: rgba(255,255,255,.4);
+    }
+
+    .buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 8px;
+    }
+
+    button {
+        flex: 1;
+        border: 0;
+        padding: 12px;
+        border-radius: 13px;
+        color: white;
+        background: rgba(255,255,255,.1);
+        cursor: pointer;
+        font: inherit;
+        transition: background .2s ease, transform .2s ease;
+    }
+
+    button:hover {
+        background: rgba(255,255,255,.18);
+    }
+
+    button:active {
+        transform: scale(.97);
+    }
+
+    .primary {
+        background: rgba(255,255,255,.85);
+        color: #111;
+    }
+
+    .primary:hover {
+        background: white;
+    }
+
+    /* Settings */
+    .settings {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+
+        width: 42px;
+        height: 42px;
+
+        border-radius: 14px;
+
+        display: grid;
+        place-items: center;
+
+        background: var(--glass);
+        border: 1px solid var(--border);
+
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+
+        cursor: pointer;
+
+        opacity: .6;
+        transition: .25s ease;
+    }
+
+    .settings:hover {
+        opacity: 1;
+        transform: rotate(20deg);
+    }
+
+    .settings svg {
+        width: 19px;
+        height: 19px;
+    }
+
+    /* File inputs */
+    .file-label {
+        display: block;
+        padding: 12px;
+        margin-bottom: 12px;
+
+        text-align: center;
+
+        border-radius: 13px;
+        border: 1px dashed rgba(255,255,255,.2);
+
+        color: var(--muted);
+        cursor: pointer;
+
+        transition: .2s ease;
+    }
+
+    .file-label:hover {
+        background: rgba(255,255,255,.06);
+        color: white;
+    }
+
+    .file-label input {
+        display: none;
+    }
+
+    /* Animations */
+    @keyframes appear {
+        from {
+            opacity: 0;
+            transform: translateY(18px) scale(.97);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @keyframes siteIn {
+        from {
+            opacity: 0;
+            transform: translateY(12px) scale(.9);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @keyframes fade {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes panelIn {
+        from {
+            opacity: 0;
+            transform: translateY(15px) scale(.96);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @media (max-width: 600px) {
+        .logo {
+            width: 90px;
+            height: 90px;
+            border-radius: 24px;
+        }
+
+        .sites {
+            max-width: 330px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div id="background"></div>
+
+<main>
+    <div class="container">
+
+        <!-- Logo -->
+        <div id="logoContainer">
+            <div class="logo default-logo" id="defaultLogo">
+                Y
+            </div>
+
+            <img
+                id="logoImage"
+                class="logo"
+                style="display:none"
+                alt="Logo"
+            >
+        </div>
+
+        <!-- Bookmark -->
+        <div class="bookmark" id="bookmark" title="Bookmarks">
+            <svg viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+                <path d="M6 4.5A2.5 2.5 0 0 1 8.5 2h7A2.5 2.5 0 0 1 18 4.5V21l-6-3.5L6 21V4.5Z"/>
+            </svg>
+        </div>
+
+        <!-- Websites -->
+        <div class="sites" id="sites">
+
+            <div class="site" data-url="https://github.com" title="GitHub">
+                <img src="https://github.githubassets.com/favicons/favicon.png">
+            </div>
+
+            <div class="site" data-url="https://youtube.com" title="YouTube">
+                <img src="https://www.youtube.com/s/desktop/favicon.ico">
+            </div>
+
+            <div class="site" data-url="https://google.com" title="Google">
+                <img src="https://www.google.com/favicon.ico">
+            </div>
+
+            <div class="site" data-url="https://reddit.com" title="Reddit">
+                <img src="https://www.reddit.com/favicon.ico">
+            </div>
+
+            <div class="site add" id="addSite" title="Add website">
+                +
+            </div>
+
+        </div>
+
+    </div>
+</main>
+
+<!-- Settings -->
+<div class="settings" id="settings" title="Settings">
+    <svg viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2">
+        <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z"/>
+        <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.8 1.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V20H11.5v-.1a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-1.8-1.8.06-.06A1.7 1.7 0 0 0 7.13 15a1.7 1.7 0 0 0-1.56-1.03H5.5v-2.54h.07A1.7 1.7 0 0 0 7.13 10a1.7 1.7 0 0 0-.34-1.88l-.06-.06 1.8-1.8.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 11.5 5.1V5h2.54v.1a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.8 1.8-.06.06A1.7 1.7 0 0 0 18.4 10a1.7 1.7 0 0 0 1.56 1.03H20v2.54h-.04A1.7 1.7 0 0 0 19.4 15Z"/>
+    </svg>
+</div>
+
+<!-- Add website modal -->
+<div class="modal" id="siteModal">
+    <div class="panel">
+        <h2>Add website</h2>
+
+        <input
+            id="siteName"
+            type="text"
+            placeholder="Name"
+        >
+
+        <input
+            id="siteURL"
+            type="text"
+            placeholder="https://example.com"
+        >
+
+        <div class="buttons">
+            <button id="cancelSite">Cancel</button>
+            <button class="primary" id="saveSite">Add</button>
+        </div>
+    </div>
+</div>
+
+<!-- Settings modal -->
+<div class="modal" id="settingsModal">
+    <div class="panel">
+        <h2>Customize</h2>
+
+        <label class="file-label">
+            Upload background
+            <input
+                id="backgroundUpload"
+                type="file"
+                accept="image/*"
+            >
+        </label>
+
+        <label class="file-label">
+            Upload logo
+            <input
+                id="logoUpload"
+                type="file"
+                accept="image/*"
+            >
+        </label>
+
+        <div class="buttons">
+            <button id="reset">Reset</button>
+            <button class="primary" id="closeSettings">Done</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const $ = selector => document.querySelector(selector);
+
+    const background = $("#background");
+    const logoImage = $("#logoImage");
+    const defaultLogo = $("#defaultLogo");
+
+    const siteModal = $("#siteModal");
+    const settingsModal = $("#settingsModal");
+
+    /*
+     * Local storage
+     */
+
+    const savedBackground = localStorage.getItem("start_background");
+    const savedLogo = localStorage.getItem("start_logo");
+    const savedSites = JSON.parse(
+        localStorage.getItem("start_sites") || "[]"
+    );
+
+    if (savedBackground) {
+        background.style.backgroundImage =
+            `url("${savedBackground}")`;
+    }
+
+    if (savedLogo) {
+        logoImage.src = savedLogo;
+        logoImage.style.display = "block";
+        defaultLogo.style.display = "none";
+    }
+
+    /*
+     * Website shortcuts
+     */
+
+    function openSite(url) {
+        if (!url.startsWith("http://") &&
+            !url.startsWith("https://")) {
+            url = "https://" + url;
+        }
+
+        window.location.href = url;
+    }
+
+    function createSite(site) {
+        const el = document.createElement("div");
+
+        el.className = "site";
+        el.title = site.name;
+        el.style.animationDelay =
+            `${Math.random() * .15}s`;
+
+        const img = document.createElement("img");
+
+        img.src =
+            `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=64`;
+
+        img.onerror = () => {
+            img.src = "data:image/svg+xml," +
+                encodeURIComponent(`
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         width="64" height="64">
+                        <rect width="64" height="64"
+                              rx="14" fill="#555"/>
+                        <text x="32" y="40"
+                              text-anchor="middle"
+                              font-size="28"
+                              fill="white">?</text>
+                    </svg>
+                `);
+        };
+
+        el.appendChild(img);
+
+        el.onclick = () => openSite(site.url);
+
+        $("#sites").insertBefore(el, $("#addSite"));
+    }
+
+    savedSites.forEach(createSite);
+
+    /*
+     * Add website
+     */
+
+    $("#addSite").onclick = () => {
+        siteModal.classList.add("active");
+        $("#siteName").focus();
+    };
+
+    $("#cancelSite").onclick = () => {
+        siteModal.classList.remove("active");
+    };
+
+    $("#saveSite").onclick = () => {
+        const name = $("#siteName").value.trim();
+        const url = $("#siteURL").value.trim();
+
+        if (!name || !url) return;
+
+        const site = { name, url };
+
+        savedSites.push(site);
+
+        localStorage.setItem(
+            "start_sites",
+            JSON.stringify(savedSites)
+        );
+
+        createSite(site);
+
+        $("#siteName").value = "";
+        $("#siteURL").value = "";
+
+        siteModal.classList.remove("active");
+    };
+
+    /*
+     * Existing sites
+     */
+
+    document.querySelectorAll(".site[data-url]").forEach(site => {
+        site.onclick = () => openSite(site.dataset.url);
+    });
+
+    /*
+     * Bookmark
+     */
+
+    $("#bookmark").onclick = () => {
+        window.location.href = "https://www.google.com/bookmarks/";
+    };
+
+    /*
+     * Settings
+     */
+
+    $("#settings").onclick = () => {
+        settingsModal.classList.add("active");
+    };
+
+    $("#closeSettings").onclick = () => {
+        settingsModal.classList.remove("active");
+    };
+
+    /*
+     * Background upload
+     */
+
+    $("#backgroundUpload").onchange = event => {
+        const file = event.target.files[0];
+
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = e => {
+            const image = e.target.result;
+
+            background.style.backgroundImage =
+                `url("${image}")`;
+
+            localStorage.setItem(
+                "start_background",
+                image
+            );
+        };
+
+        reader.readAsDataURL(file);
+    };
+
+    /*
+     * Logo upload
+     */
+
+    $("#logoUpload").onchange = event => {
+        const file = event.target.files[0];
+
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = e => {
+            const image = e.target.result;
+
+            logoImage.src = image;
+
+            logoImage.style.display = "block";
+            defaultLogo.style.display = "none";
+
+            localStorage.setItem(
+                "start_logo",
+                image
+            );
+        };
+
+        reader.readAsDataURL(file);
+    };
+
+    /*
+     * Reset
+     */
+
+    $("#reset").onclick = () => {
+        localStorage.removeItem("start_background");
+        localStorage.removeItem("start_logo");
+        localStorage.removeItem("start_sites");
+
+        location.reload();
+    };
+
+    /*
+     * Close modals when clicking outside
+     */
+
+    document.querySelectorAll(".modal").forEach(modal => {
+        modal.addEventListener("click", e => {
+            if (e.target === modal) {
+                modal.classList.remove("active");
+            }
+        });
+    });
+
+    /*
+     * ESC closes modals
+     */
+
+    document.addEventListener("keydown", e => {
+        if (e.key === "Escape") {
+            document.querySelectorAll(".modal")
+                .forEach(m => m.classList.remove("active"));
+        }
+    });
+</script>
+
+</body>
+</html>
